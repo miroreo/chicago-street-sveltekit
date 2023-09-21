@@ -127,7 +127,10 @@
         </ul>
     </div>
     <div class="bottom-0 my-2 flex flex-row gap-x-2">
-        <button class="bg-gray-700 p-2 rounded-full" on:click={() => gameScore.update(val => ({guessedStreets: {}, guessedStreetCount: 0, guessedStreetLength: 0}))}>Reset</button>
+        <button class="bg-gray-700 p-2 rounded-full" on:click={() => {
+            gameScore.update(val => ({guessedStreets: {}, guessedStreetCount: 0, guessedStreetLength: 0}))
+            disableFilters = false;
+        }}>Reset</button>
         <button disabled={numStreetDisabled} class="bg-gray-700 p-2 rounded-full" on:click={guessNumberedStreets}>Numbered Streets</button>
     </div>
 </main>
