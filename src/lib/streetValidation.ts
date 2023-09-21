@@ -45,7 +45,10 @@ export const loadStreets = async () => {
     const options = get(gameOptions).dataSet;
     const { unnamed, expressway, arterial, collector, local, namedAlley, tiered, ramp, extent, river, sidewalk, unclassified } = options;
     const returnData = turf.featureCollection<turf.Geometry, ChicagoStreetProps>([]);
-    let res = await fetch('https://chidatarepo.tessa.ooo/simpleStreetsMin.geo.json');
+    // let res = await fetch('https://chidatarepo.tessa.ooo/simpleStreetsMin.geo.json');
+    let res = await fetch('http://localhost:3000/continuousStreets.geo.json', {
+        mode: "cors"
+    });
     let data = await res.json();
     returnData.features = returnData.features.concat(data.features);
     streetsData.set(returnData);
@@ -61,6 +64,16 @@ export const getTotalLength = () => {
     })
     return length;
 }
+export const getTotalStreets = () => {
+    const streets = get(streetsData);
+    let streetNames: string[] = [];
+    streets.features.forEach((street) => {
+        if(checkClass(street) && !streetNames.includes(street.properties.street_nam || "")) {
+            streetNames.push(street.properties.street_nam || "");
+        }
+    })
+    return streetNames.length;
+}
 const checkGuessed = (streetName: string) => {
     const guessedStreets = get(gameScore).guessedStreets;
     return Object.keys(guessedStreets).includes(streetName.toUpperCase());
@@ -68,6 +81,15 @@ const checkGuessed = (streetName: string) => {
 
 const checkClass = (street: turf.Feature<turf.Geometry, ChicagoStreetProps>) => {
     const dataSet = get(gameOptions).dataSet;
+    if(!street.properties.street_nam) return dataSet.unnamed;
+    switch(street.properties.street_typ) {
+        case "EXPY":
+            return dataSet.expressway;
+        case "RL":
+            return dataSet.expressway;
+        default:
+            break;
+    }
     switch(street.properties.class) {
         case "1":
             return dataSet.expressway;
@@ -92,6 +114,7 @@ const checkClass = (street: turf.Feature<turf.Geometry, ChicagoStreetProps>) => 
         case "99":
             return dataSet.unclassified;
         default:
-            return false
+            break;
     }
+
 }

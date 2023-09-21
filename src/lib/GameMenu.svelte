@@ -5,7 +5,7 @@
     import { get } from "svelte/store";
 
     const dispatcher = createEventDispatcher();
-
+    export let isVisible = true;
     let currentStreetName = "";
     const handleSubmit = (event: SubmitEvent) => {
         event.preventDefault();
@@ -26,6 +26,7 @@
     gameScore.subscribe(sc => {
         if(sc.guessedStreetCount > 0) disableFilters = true;
     })
+    let numStreetDisabled = false;
     const guessNumberedStreets = () => {
         for(let i = 0; i <= 138; i++) {
             let toGuess = "";
@@ -44,19 +45,22 @@
             else toGuess = i + "th";
             dispatcher("guess", toGuess);
         }
+        numStreetDisabled = true
     }
 </script>
-<main class="h-screen overflow-y-scroll bg-gray-900 text-white p-5 flex flex-col">
+<main class="md:h-screen overflow-y-scroll bg-gray-900 text-white p-5 flex flex-col max-w-7xl">
     <h1 class="text-xl font-extrabold my-2"><span class="text-blue-300">CHI</span> Streets Game</h1>
     {#if $streetsLoading}
     <p class="">Loading...</p>
     {:else}
     <form on:submit={handleSubmit}>
         <p class="py-2">Enter a street name below. Omit the direction and "street" part of it.</p>
-        <input type="text" placeholder="" bind:value={currentStreetName} class="px-3 py-2 rounded-lg bg-gray-700"/>
-        <button type="submit">Guess</button><br />
+        <div class="flex flex-row w-full gap-x-2 py-2">
+            <input type="text" placeholder="" bind:value={currentStreetName} class="px-3 py-2 rounded-lg bg-gray-700 w-full"/>
+            <button type="submit">Guess</button><br />
+        </div>
         <!-- <input type="checkbox" on:change={updateValue("gameOptions.showOptions")} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" /> -->
-        <button on:click={() => showOptions.update(val => !val)}>Show Options</button>
+        <button class="bg-gray-700 rounded-full p-2 my-2"on:click={() => showOptions.update(val => !val)}>{$showOptions? "Hide" : "Show"} Options</button>
         {#if $showOptions == true}
         <ul>
             <li>
@@ -72,7 +76,7 @@
                 <label for="collector">Collector</label>
             </li>
             <li>
-                <input name="expressway" type="checkbox" disabled={disableFilters} bind:value={$gameOptions.dataSet.expressway} />
+                <input name="expressway" type="checkbox" disabled={disableFilters} bind:checked={$gameOptions.dataSet.expressway} />
                 <label for="expressway">Expressway</label>
             </li>
             <li>
@@ -111,8 +115,10 @@
         {/if}
     </form>
     {/if}
-    <progress class="h-3 bg-gray-700 in-range:bg-green-500 rounded-full" id="progressbar" max={$gameStatistics.totalLength} value={$gameStatistics.currentLength+100}></progress>
-    <label for="progressbar">{$gameScore.guessedStreetLength.toFixed(3)} of {$gameStatistics.totalLength.toFixed(3)} mi guessed</label>
+    <progress class="h-3 bg-gray-700 in-range:bg-green-500 rounded-full" id="lengthProgress" max={$gameStatistics.totalLength} value={$gameStatistics.currentLength}></progress>
+    <label for="lengthProgress">{$gameScore.guessedStreetLength.toFixed(3)} of {$gameStatistics.totalLength.toFixed(3)} mi guessed</label>
+    <progress class="h-3 bg-gray-700 rounded-full" id="countProgress" max={$gameStatistics.totalStreets} value={$gameScore.guessedStreetCount}></progress>
+    <label for="countProgress">{$gameScore.guessedStreetCount} of {$gameStatistics.totalStreets} streets guessed</label>
     <div class="overflow-y-scroll w-full h-full">
         <ul>
         {#each Object.keys($gameScore.guessedStreets) as streetName}
@@ -122,6 +128,6 @@
     </div>
     <div class="bottom-0 my-2 flex flex-row gap-x-2">
         <button class="bg-gray-700 p-2 rounded-full" on:click={() => gameScore.update(val => ({guessedStreets: {}, guessedStreetCount: 0, guessedStreetLength: 0}))}>Reset</button>
-        <button class="bg-gray-700 p-2 rounded-full" on:click={guessNumberedStreets}>Numbered Streets</button>
+        <button disabled={numStreetDisabled} class="bg-gray-700 p-2 rounded-full" on:click={guessNumberedStreets}>Numbered Streets</button>
     </div>
 </main>

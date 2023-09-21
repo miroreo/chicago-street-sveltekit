@@ -1,6 +1,6 @@
 import { type Writable, writable, get } from 'svelte/store';
 import * as turf from '@turf/turf';
-import { getTotalLength, loadStreets } from "$lib/streetValidation";
+import { getTotalLength, getTotalStreets, loadStreets } from "$lib/streetValidation";
 
 export const gameOptions = writable({
     dataSet: {
@@ -63,12 +63,13 @@ export const streetsLoading = writable(false);
 
 let dataSetPrev = get(gameOptions).dataSet;
 gameOptions.subscribe((val) => {
-    console.log(val);
+    // console.log(val);
     if (Object.values(val.dataSet) != Object.values(dataSetPrev)) {
         dataSetPrev = val.dataSet;
-        console.log("dataSet changed");
+        // console.log("dataSet changed");
         gameStatistics.update(stat => {
             stat.totalLength = getTotalLength();
+            stat.totalStreets = getTotalStreets();
             return stat;
         })
     }
@@ -76,6 +77,7 @@ gameOptions.subscribe((val) => {
 streetsData.subscribe((val) => {
     gameStatistics.update(stat => {
         stat.totalLength = getTotalLength();
+        stat.totalStreets = getTotalStreets();
         return stat;
     });
 })

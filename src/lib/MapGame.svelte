@@ -10,6 +10,8 @@
     import { loadStreets } from "./streetValidation";
     import { get } from "svelte/store";
 
+    export let isVisible = true;
+
     const initialState = {
         lng: -87.6278269,
         lat: 41.8820096,
@@ -20,6 +22,7 @@
     const mapInit = (event: CustomEvent<{map: Map}>) => {
         let initedMap = event.detail.map;
         map = initedMap;
+        window.map = initedMap;
         initedMap.addControl(new MapboxDraw({
             displayControlsDefault: false,
             controls: {
@@ -61,10 +64,11 @@
                 'fill-opacity': 1,
             },
         });
+        // initedMap.addLayer({
+        //     id: 'chicago-streets',
+
+        // })
         loadStreets();
-        let score = {
-            guessedStreets: {}
-        };
     }
 
     // watch for new streets within gameScore and add them to the map
@@ -72,9 +76,31 @@
         if(!map) return;
         // console.log("Map sees gameScore change");
         // console.log(score);
+        if(score.guessedStreetCount == 0) { // detect a reset
+            console.log("Resetting Map...")
+            const guessedLayers = map.getStyle().layers.filter(lay => {
+                return lay.id.startsWith("guessed-street-")
+            })
+            // console.log(guessedLayers)
+            if(guessedLayers.length > 0) {
+                guessedLayers.forEach(lay => {
+                    map.removeLayer(lay.id);
+                })
+            }
+        }
+
+        // console.log(score);
         let newStreets = Object.keys(score.guessedStreets).filter(street => {
             return !score.guessedStreets[street].addedToMap;
         });
+
+        let oldStreets = map.getStyle().layers.filter(layer => {
+            if(!layer.id.startsWith("guessed-street-")) return false;
+            if(newStreets.includes(layer.id.replace("guessed-street-", ""))) return false;
+        })
+        oldStreets.forEach(oldStreet => {
+            map.removeLayer(oldStreet.id);
+        })
         // console.log(newStreets);
         newStreets.forEach(newStreet => {
             map.addLayer({
@@ -96,6 +122,6 @@
         })
     })
 </script>
-<main>
+<main class="max-h-96 md:max-h-screen md:visible">
     <MapboxMap on:ready={mapInit}/>
 </main>
