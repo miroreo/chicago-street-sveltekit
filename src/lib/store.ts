@@ -1,8 +1,9 @@
 import { type Writable, writable, get } from 'svelte/store';
+import { persist, createLocalStorage } from "@macfja/svelte-persistent-store"
 import * as turf from '@turf/turf';
 import { getTotalLength, getTotalStreets, loadStreets } from "$lib/streetValidation";
 
-export const gameOptions = writable({
+export const gameOptions = persist(writable({
     dataSet: {
         unnamed: false,
         expressway: true,
@@ -17,14 +18,14 @@ export const gameOptions = writable({
         sidewalk: false,
         unclassified: false
     },
-});
+}), createLocalStorage(), "gameOptions");
 
-export const gameStatistics = writable({
+export const gameStatistics = persist(writable({
     totalStreets: 0,
     totalLength: 0,
     currentStreets: 0,
     currentLength: 0,
-});
+}), createLocalStorage(), "gameStatistics");
 
 export const gameScore: Writable<{
     guessedStreets: {
@@ -36,11 +37,11 @@ export const gameScore: Writable<{
     },
     guessedStreetCount: number,
     guessedStreetLength: number,
-}> = writable({
+}> = persist(writable({
     guessedStreets: {},
     guessedStreetCount: 0,
     guessedStreetLength: 0,
-});
+}), createLocalStorage(), "gameScore");
 
 export const streetsData = writable(turf.featureCollection<turf.Geometry, ChicagoStreetProps>([]));
 export const streetsDataCached: Writable<{[key:string]: turf.FeatureCollection}> = writable({

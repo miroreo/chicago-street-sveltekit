@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Map, Layer } from "mapbox-gl";
+    import { type Map, type Layer, ScrollZoomHandler } from "mapbox-gl";
     import MapboxDraw from '@mapbox/mapbox-gl-draw';
     // import type { Map } from "mapbox-gl";
     import MapboxMap from "./MapboxMap.svelte";
@@ -69,6 +69,10 @@
 
         // })
         loadStreets();
+        gameScore.update(val => {
+            val.guessedStreets = val.guessedStreets;
+            return val;
+        })
     }
 
     // watch for new streets within gameScore and add them to the map
@@ -91,7 +95,10 @@
 
         // console.log(score);
         let newStreets = Object.keys(score.guessedStreets).filter(street => {
-            return !score.guessedStreets[street].addedToMap;
+            return map.getStyle().layers.filter(layer => {
+                if(!layer.id.startsWith("guessed-street-")) return false;
+                if(layer.id.replace("guessed-street-", "") == street) return true;
+            }).length == 0;
         });
 
         let oldStreets = map.getStyle().layers.filter(layer => {
