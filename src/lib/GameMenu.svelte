@@ -45,10 +45,13 @@
             else toGuess = i + "th";
             dispatcher("guess", toGuess);
         }
+        dispatcher("numberedStreets");
         numStreetDisabled = true
     }
 </script>
 <main class="md:h-screen overflow-y-scroll bg-gray-900 text-white p-5 flex flex-col max-w-7xl">
+    <!-- <h1 class="text-lg font-extrabold my-2"><span class="text-blue-30</span></h1> -->
+    
     <h1 class="text-xl font-extrabold my-2"><span class="text-blue-300">CHI</span> Streets Game</h1>
     {#if $streetsLoading}
     <p class="">Loading...</p>
@@ -131,6 +134,6 @@
             gameScore.update(val => ({guessedStreets: {}, guessedStreetCount: 0, guessedStreetLength: 0}))
             disableFilters = false;
         }}>Reset</button>
-        <button disabled={numStreetDisabled} class="bg-gray-700 p-2 rounded-full" on:click={guessNumberedStreets}>Numbered Streets</button>
+        <button disabled={numStreetDisabled} class="bg-gray-700 p-2 rounded-full" on:click={guessNumberedStreets}>Guess All Numbered Streets (very slow)</button>
     </div>
 </main>

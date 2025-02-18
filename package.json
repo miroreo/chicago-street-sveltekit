@@ -32,6 +32,8 @@
     "@macfja/svelte-persistent-store": "^2.4.0",
     "@turf/mask": "^6.5.0",
     "@turf/turf": "^6.5.0",
-    "leaflet": "^1.9.4"
+    "leaflet": "^1.9.4",
+    "maplibre-gl": "^5.1.0",
+    "maplibre-gl-draw": "^1.6.9"
   }
 }

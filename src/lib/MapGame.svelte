@@ -1,14 +1,16 @@
 <script lang="ts">
-    import { type Map, type Layer, ScrollZoomHandler } from "mapbox-gl";
-    import MapboxDraw from '@mapbox/mapbox-gl-draw';
+    import { type Map, type ScrollZoomHandler } from "maplibre-gl";
+    import MapLibreDraw from 'maplibre-gl-draw';
     // import type { Map } from "mapbox-gl";
     import MapboxMap from "./MapboxMap.svelte";
+    import MapLibreMap from "./MapLibreMap.svelte"
     import { onMount } from "svelte";
     import CHICAGO_BOUNDS from "$lib/chibounds.geo.json";
     import * as turf from '@turf/turf';
     import { gameScore, streetsLoading } from "./store";
     import { loadStreets } from "./streetValidation";
     import { get } from "svelte/store";
+    // import MapLibreMap from "./MapLibreMap.svelte";
 
     export let isVisible = true;
 
@@ -22,15 +24,21 @@
     const mapInit = (event: CustomEvent<{map: Map}>) => {
         let initedMap = event.detail.map;
         map = initedMap;
-        window.map = initedMap;
-        initedMap.addControl(new MapboxDraw({
-            displayControlsDefault: false,
-            controls: {
-                polygon: true,
-                trash: true
-            }
-        }));
-
+        // window.map = initedMap;
+        // initedMap.addControl(new MapboxDraw({
+        //     displayControlsDefault: false,
+        //     controls: {
+        //         polygon: true,
+        //         trash: true
+        //     }
+        // }));
+        // initedMap.addControl(new MapLibreDraw({
+        //     displayControlsDefault: false,
+        //     controls: {
+        //         polygon: true,
+        //         trash: true,
+        //     }
+        // }))
         initedMap.addSource('chicago-bounds', {
             type: 'geojson',
             // data: "https://chidatarepo.tessa.ooo/CHI-bounds-inverted.json"
@@ -74,7 +82,9 @@
             return val;
         })
     }
+    const renderNumberedStreets = () => {
 
+    }
     // watch for new streets within gameScore and add them to the map
     gameScore.subscribe(score => {
         if(!map) return;
@@ -82,6 +92,7 @@
         // console.log(score);
         if(score.guessedStreetCount == 0) { // detect a reset
             console.log("Resetting Map...")
+
             const guessedLayers = map.getStyle().layers.filter(lay => {
                 return lay.id.startsWith("guessed-street-")
             })
@@ -130,5 +141,5 @@
     })
 </script>
 <main class="max-h-96 md:max-h-screen md:visible">
-    <MapboxMap on:ready={mapInit}/>
+    <MapLibreMap on:ready={mapInit}/>
 </main>

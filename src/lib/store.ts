@@ -44,6 +44,7 @@ export const gameScore: Writable<{
 }), createLocalStorage(), "gameScore");
 
 export const streetsData = writable(turf.featureCollection<turf.Geometry, ChicagoStreetProps>([]));
+export const groupedStreetsData: Writable<{[key: string]: turf.Feature<turf.Geometry, ChicagoStreetProps>}> = writable({});
 export const streetsDataCached: Writable<{[key:string]: turf.FeatureCollection}> = writable({
     unnamedStreets: turf.featureCollection([]),
     expressways: turf.featureCollection([]),

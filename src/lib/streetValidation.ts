@@ -1,28 +1,36 @@
 import { get } from 'svelte/store';
-import { gameOptions, streetsLoading, streetsData, streetsDataCached, gameScore, gameStatistics } from './store';
+import { gameOptions, streetsLoading, streetsData, streetsDataCached, gameScore, gameStatistics, groupedStreetsData } from './store';
 import * as turf from '@turf/turf';
 const streetMatching = (street: string) => {
     
 }
 
 export const validateGuess = (street: string) => {
+    console.log("Guess: " + street);
     if (checkGuessed(street)) return false;
 
     const streets = get(streetsData);
-    let match = false;
+    const groupedStreets = get(groupedStreetsData);
+    // let match = false;
     let newStreet = false;
     let newScore = {
         geo: turf.featureCollection<turf.Geometry, ChicagoStreetProps>([]),
         length: 0,
     }
-    streets.features.forEach((streetFeature) => {
-        if (streetFeature.properties.street_nam?.toUpperCase() == street.toUpperCase() && checkClass(streetFeature)) {
-            match = true;
-            let len = turf.length(streetFeature, {units: 'miles'});
-            newScore.length += len;
-            newScore.geo.features.push(streetFeature);
-        }
-    })
+    let match = groupedStreets[street.toUpperCase()];
+    console.log(match);
+    if(match) {
+        newScore.length += turf.length(match, {units: 'miles'});
+        newScore.geo.features.push(match);
+    }
+    // streets.features.forEach((streetFeature) => {
+    //     if (streetFeature.properties.street_nam?.toUpperCase() == street.toUpperCase() && checkClass(streetFeature)) {
+    //         match = true;
+    //         let len = turf.length(streetFeature, {units: 'miles'});
+    //         newScore.length += len;
+    //         newScore.geo.features.push(streetFeature);
+    //     }
+    // })
     if(match) {
         gameScore.update(sc => {
             sc.guessedStreets[street.toUpperCase()] = newScore;
@@ -44,36 +52,52 @@ export const loadStreets = async () => {
     streetsLoading.set(true);
     const options = get(gameOptions).dataSet;
     const { unnamed, expressway, arterial, collector, local, namedAlley, tiered, ramp, extent, river, sidewalk, unclassified } = options;
-    const returnData = turf.featureCollection<turf.Geometry, ChicagoStreetProps>([]);
-    let res = await fetch('https://chidatarepo.tessa.ooo/continuousStreets.geo.json');
+    // const returnData = turf.featureCollection<turf.Geometry, ChicagoStreetProps>([]);
+    // const returnData: {[key: string]: turf.Feature<turf.Geometry, ChicagoStreetProps>} = {};
+    let res = await fetch('https://chidatarepo.tessa.ooo/groupedContinuousStreets.json');
     // let res = await fetch('http://localhost:3000/continuousStreets.geo.json', {
     //     mode: "cors"
     // });
     let data = await res.json();
-    returnData.features = returnData.features.concat(data.features);
-    streetsData.set(returnData);
+    const returnData = data;
+    // returnData.features = returnData.features.concat(data.features);
+
+    groupedStreetsData.set(returnData);
+    // streetsData.set(returnData);
     streetsLoading.set(false);
 
 }
 
 export const getTotalLength = () => {
-    const streets = get(streetsData);
-    let length = 0;
-    streets.features.forEach((street) => {
-        checkClass(street) && (length += turf.length(street, {units: 'miles'}));
+    const groupedStreets = get(groupedStreetsData);
+    // const streets = get(streetsData);
+    // let length = 0;
+    // streets.features.forEach((street) => {
+    //     checkClass(street) && (length += turf.length(street, {units: 'miles'}));
+    // })
+    // return length;
+    let len = 0;
+    Object.values(groupedStreets).forEach(s => {
+        checkClass(s) && (len += turf.length(s, {units: 'miles'}));
     })
-    return length;
+    return len;
 }
 
 export const getTotalStreets = () => {
-    const streets = get(streetsData);
-    let streetNames: string[] = [];
-    streets.features.forEach((street) => {
-        if(checkClass(street) && !streetNames.includes(street.properties.street_nam || "")) {
-            streetNames.push(street.properties.street_nam || "");
-        }
+    // const streets = get(streetsData);
+    // let streetNames: string[] = [];
+    // streets.features.forEach((street) => {
+    //     if(checkClass(street) && !streetNames.includes(street.properties.street_nam || "")) {
+    //         streetNames.push(street.properties.street_nam || "");
+    //     }
+    // })
+    // return streetNames.length;
+    const groupedStreets = get(groupedStreetsData);
+    let names: string[] = [];
+    Object.keys(groupedStreets).forEach(name => {
+        if(checkClass(groupedStreets[name]) && !names.includes(name)) names.push(name);
     })
-    return streetNames.length;
+    return names.length;
 }
 const checkGuessed = (streetName: string) => {
     const guessedStreets = get(gameScore).guessedStreets;

@@ -1,10 +1,12 @@
 <script lang="ts">
-    import "mapbox-gl/dist/mapbox-gl.css"
-    import { default as mapboxgl, Map } from 'mapbox-gl';
+    // import "maplibre-gl/dist/mapbox-gl.css"
+    import "maplibre-gl/dist/maplibre-gl.css";
+    import { default as maplibregl, Map } from 'maplibre-gl';
     import { onMount, onDestroy } from 'svelte';
     import { browser } from '$app/environment';
     import { createEventDispatcher } from "svelte";
-    mapboxgl.baseApiUrl = "http://localhost:8080/"
+    // mapboxgl.baseApiUrl = "http://localhost:8080/"
+    // maplibregl
     let map: Map;    
     let mapContainer: HTMLElement;
     let lng: number, lat: number, zoom: number;
@@ -18,20 +20,24 @@
         if(!browser) return;
         const initialState = { lng, lat, zoom };
         
-        map = new mapboxgl.Map({
+        map = new maplibregl.Map({
             container: mapContainer,
-            accessToken: "pk.eyJ1IjoibWlyb3JlbyIsImEiOiJjbTZyeXJ6MTQwMmx4Mmxwb200YzY5MnVtIn0.Avp-i2twEyUfJPoVnztkYQ",
+            center: initialState,
+            zoom: initialState.zoom,
+            // accessToken: "pk.eyJ1IjoibWlyb3JlbyIsImEiOiJjbTZyeXJ6MTQwMmx4Mmxwb200YzY5MnVtIn0.Avp-i2twEyUfJPoVnztkYQ",
             // style: "mapbox://styles/miroreo/clmgzyb1k03sm01qr03g35iud",
             style: {
                 'version': 8,
                 'sources': {
                     'raster-tiles': {
                         'type': 'raster',
-                        'tiles': ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                        'tiles': [
+                            'https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+                            'https://b.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+                            'https://c.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+                            'https://d.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'],
                         'tileSize': 256,
-                        'attribution':
-                            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    }
+                        'attribution': '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',                    }
                 },
                 'layers': [
                     {
@@ -39,7 +45,7 @@
                         'type': 'raster',
                         'source': 'raster-tiles',
                         'minzoom': 0,
-                        'maxzoom': 22
+                        'maxzoom': 22,
                     }
                 ]
             }
