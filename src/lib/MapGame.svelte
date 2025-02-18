@@ -1,6 +1,5 @@
 <script lang="ts">
     import { type Map, type ScrollZoomHandler } from "maplibre-gl";
-    import MapLibreDraw from 'maplibre-gl-draw';
     // import type { Map } from "mapbox-gl";
     import MapboxMap from "./MapboxMap.svelte";
     import MapLibreMap from "./MapLibreMap.svelte"
